@@ -7,11 +7,11 @@ var app = express()
 app.use(bodyParser.urlencoded())
 
 // parse application/json
-app.use(bodyParser.json())
+// app.use(bodyParser.json())
 
 app.listen(2000);
 
 app.post("/", function (req, res) {
-  console.log(req.body) // populated!
-  res.send(200, req.body.name);
+  // console.log(req.body) // populated!
+  res.send(req.body.name);
 });
