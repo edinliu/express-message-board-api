@@ -1,18 +1,13 @@
-const express = require('express');
-var bodyParser = require('body-parser')
-var app = express();
-const Joi = require('joi');  //return a class
-//先在最上方把joi引進，會回傳一個class，所以這邊大寫
+const express = require('express')
+const bodyParser = require('body-parser')
+const Joi = require('joi')
+let app = express()
 
-
-//加上一個middle ware，讓app使用
+//Middle Ware
 // app.use(express.json());
 // app.use(bodyParser.json());
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded())
-
-
-
+app.use(bodyParser.urlencoded())// parse application/x-www-form-urlencoded
+//GET
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>');
 });
@@ -23,15 +18,6 @@ app.get(' :year/:month', (req, res) => {
   // res.send(req.params);
   res.send(req.query);
 });
-// app.get('/api/courses/:id', (req, res) => {
-//   let a = parseInt(req.params.id) * 2
-//   res.send(a.toString());
-// });
-
-// app.get('/api/courses/:id', (req, res) => {
-//   let id = req.params.id
-//   res.send(courses[id]);
-// });
 app.get('/api/courses/:id', (req, res) => {
   let course = courses.find(
     courses => courses.id === parseInt(req.params.id)
@@ -42,6 +28,16 @@ app.get('/api/courses/:id', (req, res) => {
   }
   res.send(course);
 });
+// app.get('/api/courses/:id', (req, res) => {
+//   let a = parseInt(req.params.id) * 2
+//   res.send(a.toString());
+// });
+
+// app.get('/api/courses/:id', (req, res) => {
+//   let id = req.params.id
+//   res.send(courses[id]);
+// });
+
 
 
 
