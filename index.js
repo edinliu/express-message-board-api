@@ -1,125 +1,87 @@
+console.clear()
 const express = require('express')
-const bodyParser = require('body-parser')
 const Joi = require('joi')
-let app = express()
+const app = express()
+const fs = require("fs")
+let datas = fs.readFileSync("data.json")// Get content from file
+datas = JSON.parse(datas)
 
 //Middle Ware
-// app.use(express.json());
-// app.use(bodyParser.json());
-app.use(bodyParser.urlencoded())// parse application/x-www-form-urlencoded
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 //GET
 app.get('/', (req, res) => {
-  res.send('<h1>Hello World!</h1>');
-});
-app.get('/api/courses', (req, res) => {
-  res.send([1, 2, 3, 4]);
-});
-app.get(' :year/:month', (req, res) => {
-  // res.send(req.params);
-  res.send(req.query);
-});
-app.get('/api/courses/:id', (req, res) => {
-  let course = courses.find(
-    courses => courses.id === parseInt(req.params.id)
-  );
-  if (!course) {
-    res.status(404).send('The course with the given ID was not found');
-    return;
-  }
-  res.send(course);
-});
-// app.get('/api/courses/:id', (req, res) => {
-//   let a = parseInt(req.params.id) * 2
-//   res.send(a.toString());
-// });
-
-// app.get('/api/courses/:id', (req, res) => {
-//   let id = req.params.id
-//   res.send(courses[id]);
-// });
-
-
-
-
-
-
-
-const courses = [
-  { id: 1, name: 'course1' },
-  { id: 2, name: 'course2' },
-  { id: 3, name: 'course3' }
-];
-
-app.post('/', function (req, res) {
-  console.log(req.body)
-  res.send(req.body.name)
+  res.send(datas)
 })
-app.post('/api/courses', (req, res) => {
-  // a schema defines the shape of our objects, 例如有沒有email, 有沒有字數限制？這裡用schema來定義新course這個object的規範
+/**
+/:param is in params
+?var=value is in query
+ */
+app.get('/:year/:month', (req, res) => {
+  res.send(JSON.stringify(req.params) + '\n' + JSON.stringify(req.query))
+})
+function validateData(data) {
   let schema = {
-    name: Joi.string().min(3).required()
-  };
-  let result = Joi.validate(req.body, schema);
-  /* return an object that has two properties: error and value.
-  Only one of them can exist.*/
-  console.log(result);
-  //這裡輸出result，就會知道當error時該輸出哪些錯誤訊息給用戶端↓
-  //這也是Joi.js的強大與方便
-  if (result.error) {
-    res.status(400).send(result.error.details[0].message);
-    //把error物件中適當的property輸出，提供了反映用戶API錯誤的訊息
-    // status code 400 Means bad request
-    return;
+    name: Joi.string().min(3).required(),
+    email: Joi.string().min(5).required(),
+    title: Joi.string().min(5).required(),
+    content: Joi.string().min(20).required(),
+    tag: Joi.string().min(5).required(),
+    deletPassword: Joi.string().min(5).required(),
   }
-  let course = {
-    id: courses.length + 1,
-    name: req.body.name
-  }
-  courses.push(course);
-  res.send(course);
-});
-
-function validateCourse(course) {
-  let schema = {
-    name: Joi.string().min(3).required()
-  };
-  return Joi.validate(course, schema);
+  return Joi.validate(data, schema)
 }
-
-
-app.put('/api/courses/:id', (req, res) => {
-  let course = courses.find(courses => courses.id === parseInt(req.params.id));
-  if (!course) {
-    res.status(404).send('The course with the given ID was not found');
-    return;
-  }
-  let result = validateCourse(req.body); //參數傳入req.body，一行解決
-
+app.post('/', function (req, res) {
+  let result = validateData(req.body)
   if (result.error) {
     res.status(400).send(result.error.details[0].message);
-    return;
+    return
   }
-  course.name = result.value.name;
-  res.send(course);
-});
+  let newData = result.value
+  newData.id = datas.length + 1
+  datas.push(newData)
+  res.send(datas)
+  fs.writeFile('data.json', JSON.stringify(datas), (err) => {
+    if (err) throw err
+    console.log('Users saved!')
+  })
+})
+
+app.put('/:id', (req, res) => {
+  let targetId
+  let found = datas.find(i => i.id === parseInt(req.params.id) ? targetId = i.id : null
+  )
+  if (!found) {
+    res.status(404).send('The course with the given ID was not found');
+    return
+  }
+  let result = validateData(req.body); //參數傳入req.body，一行解決
+  if (result.error) {
+    res.status(400).send(result.error.details[0].message);
+    return
+  }
+  datas[targetId - 1] = result.value
+  datas[targetId - 1].id = targetId
+  res.send(datas)
+})
 
 app.delete('/api/courses/:id', (req, res) => {
-  let course = courses.find(courses => courses.id === parseInt(req.params.id));
-  if (!course) {
-    res.status(404).send('The course with the given ID was not found');
-    return;
+  let found = datas.find(i => i.id === parseInt(req.params.id))
+  if (!found) {
+    res.status(404).send('The course with the given ID was not found')
+    return
   }
-  let index = courses.indexOf(course);
+  let index = datas.indexOf(found)
   /* The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.*/
   // what return is number 
 
-  courses.splice(index, 1);
+  datas.splice(index, 1);
   // This method changes the contents of an array by removing existing elements and/or adding new elements.
-  res.send(course); //傳給client端
-});
+  res.send(datas); //傳給client端
+})
 
-const port = process.env.PORT || 2000;
+const port = process.env.PORT || 3000
 
 app.listen(port, () => {
-  console.log(`Listening on port ${port}...`);
-});
+  console.log(`Listening on port ${port}...`)
+})
