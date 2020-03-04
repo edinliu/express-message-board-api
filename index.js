@@ -65,7 +65,7 @@ app.put('/:id', (req, res) => {
   res.send(datas)
 })
 
-app.delete('/api/courses/:id', (req, res) => {
+app.delete('/:id', (req, res) => {
   let found = datas.find(i => i.id === parseInt(req.params.id))
   if (!found) {
     res.status(404).send('The course with the given ID was not found')
