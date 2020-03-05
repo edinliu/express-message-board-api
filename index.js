@@ -31,6 +31,12 @@ function validateData(data) {
   }
   return Joi.validate(data, schema)
 }
+function saveData() {
+  fs.writeFile('data.json', JSON.stringify(datas), (err) => {
+    if (err) throw err
+    console.log('Users saved!')
+  })
+}
 app.post('/', function (req, res) {
   let result = validateData(req.body)
   if (result.error) {
@@ -41,10 +47,7 @@ app.post('/', function (req, res) {
   newData.id = datas.length + 1
   datas.push(newData)
   res.send(datas)
-  fs.writeFile('data.json', JSON.stringify(datas), (err) => {
-    if (err) throw err
-    console.log('Users saved!')
-  })
+  saveData()
 })
 
 app.put('/:id', (req, res) => {
@@ -63,6 +66,7 @@ app.put('/:id', (req, res) => {
   datas[targetId - 1] = result.value
   datas[targetId - 1].id = targetId
   res.send(datas)
+  saveData()
 })
 
 app.delete('/:id', (req, res) => {
@@ -75,9 +79,9 @@ app.delete('/:id', (req, res) => {
   /* The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.*/
   // what return is number 
 
-  datas.splice(index, 1);
-  // This method changes the contents of an array by removing existing elements and/or adding new elements.
+  datas[index].isDelet = true
   res.send(datas); //傳給client端
+  saveData()
 })
 
 const port = process.env.PORT || 3000
