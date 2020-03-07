@@ -30,10 +30,7 @@ function validateData(data) {
   let schema = {
     name: Joi.string().min(3).required(),
     email: Joi.string().min(5).required(),
-    title: Joi.string().min(5).required(),
     content: Joi.string().min(20).required(),
-    tag: Joi.string().min(5).required(),
-    deletPassword: Joi.string().min(5).required(),
   }
   return Joi.validate(data, schema)
 }
