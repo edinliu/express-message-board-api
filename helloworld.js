@@ -1,7 +1,5 @@
 console.clear()
 var express = require("express")
-const { expressCspHeader, INLINE, NONE, SELF } = require('express-csp-header')
-// var cors = require('cors')
 var app = express()
 //開放cors
 app.all('/', function (req, res, next) {
@@ -12,28 +10,15 @@ app.all('/', function (req, res, next) {
     'Access-Control-Allow-Credentials': 'true',
     "Access-Control-Allow-Methods": "*",
     "Access-Control-Allow-Headers": "*",
-
   })
-  res.header("Content-Security-Policy", "default-src", "self")
   next()
 })
 app.use((req, res, next) => {
   console.clear()
-  console.log("Request Header:")
-  console.log(req.headers)
+  // console.log("Request Header:")
+  // console.log(req.headers)
   next()
 })
-app.use(expressCspHeader({
-  directives: {
-    'default-src': [SELF],
-    'script-src': [SELF, INLINE, 'somehost.com'],
-    'style-src': [SELF, 'mystyles.net'],
-    'img-src': ['data:', 'images.com'],
-    'worker-src': [NONE],
-    'block-all-mixed-content': true
-  }
-}))
-// app.options('*', cors(corsOptions))
 app.get('/', (req, res) => {
   console.clear()
   console.log(req.headers)
@@ -49,7 +34,6 @@ app.put('/', function (req, res) {
 })
 app.delete('/', function (req, res) {
   console.log("DELET")
-
   res.send('Got a DELETE request at /user');
 })
 app.listen(3000, () => { console.log("Example app listening on port 3000!") })
