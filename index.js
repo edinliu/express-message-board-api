@@ -17,10 +17,9 @@ app.use(express.json())
 //Response Header
 app.all('*', function (req, res, next) {
   console.clear()
-  console.log(typeof req.body)
-  req.body.map((value, key) => {
-    console.log(value)
-  })
+  let key =  Object.keys(req.body).find(key => req.body[key] === "")
+  console.log(key)
+  
   res.header({
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Expose-Headers": "*",
