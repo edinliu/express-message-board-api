@@ -9,7 +9,7 @@ const dataSchema = {
   name: Joi.string().min(3).required(),
   email: Joi.string().min(3).required(),
   content: Joi.string().min(3).required(),
-  deletPassword: Joi.string().min(3).optional()
+  deletePassword: Joi.string().min(3).optional()
 }
 //Middle Ware
 // app.use(express.urlencoded({ extended: true }))
@@ -17,7 +17,10 @@ app.use(express.json())
 //Response Header
 app.all('*', function (req, res, next) {
   console.clear()
-  console.log(req.body)
+  console.log(typeof req.body)
+  req.body.map((value, key) => {
+    console.log(value)
+  })
   res.header({
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Expose-Headers": "*",
@@ -69,13 +72,21 @@ app.put('/', (req, res) => {
   res.send(datas[req.body.id - 1])
   saveData()
 })
-app.delete('/:id', (req, res) => {
+app.delete('/:id/:deletePassword', (req, res) => {
   if (req.params.id > datas.length) {
     res.status(404).send('The data with the given ID was not found')
     return
   }
   if (datas[req.params.id - 1].isDelete) {
     res.status(404).send('The data with the given ID was already deleted')
+    return
+  }
+  if (req.params.deletePassword === "刪文用密碼") {
+    res.status(404).send('Please input password')
+    return
+  }
+  if (req.params.deletePassword != datas[req.params.id - 1].deletePassword) {
+    res.status(404).send('Your delet password is not correct')
     return
   }
   datas[req.params.id - 1].isDelete = true
