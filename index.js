@@ -1,4 +1,4 @@
-console.clear()
+// console.clear()
 var express = require('express')
 var app = express()
 var Joi = require('joi')
@@ -16,10 +16,7 @@ const dataSchema = {
 app.use(express.json())
 //Response Header
 app.all('*', function (req, res, next) {
-  console.clear()
-  let key =  Object.keys(req.body).find(key => req.body[key] === "")
-  console.log(key)
-  
+  // console.log(req.body)
   res.header({
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Expose-Headers": "*",
@@ -30,6 +27,7 @@ app.all('*', function (req, res, next) {
   })
   next()
 })
+
 //CRUD Method
 app.get('/', (req, res) => {
   let sendData = datas.map(comment => comment.isDelete ? (() => {
@@ -38,8 +36,12 @@ app.get('/', (req, res) => {
   })() : comment)
   res.send(sendData)
 })
+app.get('/start', (req, res) => {
+  res.send("heroku server is open")
+})
 app.post('/', function (req, res) {
-  let result = Joi.validate(req.body, dataSchema)
+  let reqBody = deleteEmptyInObject(req.body)
+  let result = Joi.validate(reqBody, dataSchema)
   if (result.error) {
     res.status(400).send(result.error.details[0].message)
     console.log(result.error.details[0].message)
@@ -72,6 +74,10 @@ app.put('/', (req, res) => {
   saveData()
 })
 app.delete('/:id/:deletePassword', (req, res) => {
+  console.log("id")
+  console.log(req.params.id)
+  console.log("deletePassword")
+  console.log(req.params.deletePassword)
   if (req.params.id > datas.length) {
     res.status(404).send('The data with the given ID was not found')
     return
@@ -80,27 +86,36 @@ app.delete('/:id/:deletePassword', (req, res) => {
     res.status(404).send('The data with the given ID was already deleted')
     return
   }
-  if (req.params.deletePassword === "刪文用密碼") {
+  if (req.params.deletePassword === "n") {
     res.status(404).send('Please input password')
     return
   }
   if (req.params.deletePassword != datas[req.params.id - 1].deletePassword) {
-    res.status(404).send('Your delet password is not correct')
+    res.status(404).send('Your delete password is not correct')
     return
   }
   datas[req.params.id - 1].isDelete = true
-  res.send("Deleted")
+  let send2 = JSON.parse(JSON.stringify(datas[req.params.id - 1]))
+  send2.content = "內容已被使用者刪除"
+  res.send(send2)
   saveData()
 })
-
-const port = process.env.PORT || 3000
-app.listen(port, () => {
-  console.log(`Listening on port ${port}...`)
-})
-
+//help function
 function saveData() {
   fs.writeFile('data.json', JSON.stringify(datas), (err) => {
     if (err) throw err
     console.log('Users saved!')
   })
 }
+function deleteEmptyInObject(obj) {
+  let key = Object.keys(obj).find(key => obj[key] === "")
+  let reqBody = JSON.parse(JSON.stringify(obj))
+  delete reqBody[key]
+  return reqBody
+}
+
+
+const port = process.env.PORT || 3631
+app.listen(port, () => {
+  console.log(`Listening on port ${port}...`)
+})
