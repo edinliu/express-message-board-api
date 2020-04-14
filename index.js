@@ -30,10 +30,9 @@ app.all('*', function (req, res, next) {
 
 //CRUD Method
 app.get('/', (req, res) => {
-  let sendData = datas.map(comment => comment.isDelete ? (() => {
-    comment.content = "內容已被使用者刪除"
-    return comment
-  })() : comment)
+  let sendData = JSON.parse(JSON.stringify(datas))
+  sendData.map(comment => comment.isDelete ? blockDeletedContent(comment) : comment
+  )
   res.send(sendData)
 })
 app.get('/start', (req, res) => {
@@ -113,7 +112,10 @@ function deleteEmptyInObject(obj) {
   delete reqBody[key]
   return reqBody
 }
-
+function blockDeletedContent(comment) {
+  comment.content = "內容已被使用者刪除"
+  return comment
+}
 
 const port = process.env.PORT || 3631
 app.listen(port, () => {
