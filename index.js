@@ -3,7 +3,7 @@ var express = require('express')
 var app = express()
 var Joi = require('joi')
 var fs = require("fs")
-let datas = fs.readFileSync("data.json")// Get content from file
+let datas = fs.readFileSync("data.json")
 datas = JSON.parse(datas)
 const dataSchema = {
   name: Joi.string().min(3).required(),
