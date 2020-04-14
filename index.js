@@ -38,6 +38,9 @@ app.get('/', (req, res) => {
 app.get('/start', (req, res) => {
   res.send("heroku server is open")
 })
+app.get('/ver', (req, res) => {
+  res.send("1")
+})
 app.post('/', function (req, res) {
   let reqBody = deleteEmptyInObject(req.body)
   let result = Joi.validate(reqBody, dataSchema)
